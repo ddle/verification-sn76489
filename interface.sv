@@ -11,12 +11,17 @@
   logic					ready_o;
   logic		[0:7]	d_i; 
   logic		[0:7]	tone1_out_o;
-	logic		[0:7]	tone2_out_o;
-	logic		[0:7]	tone3_out_o;
-	logic		[0:7]	noise_out_o;
-	logic		[0:7]	aout_o;
+  logic		[0:7]	tone2_out_o;
+  logic		[0:7]	tone3_out_o;
+  logic		[0:7]	noise_out_o;
+  logic		[0:7]	aout_o;
 
-	int end_of_test;
+  logic		[0:7]	det_counter_out[4];
+  logic		[0:7]	det_magnitude_out[4];
+  logic			det_done_out[4];
+
+  int end_of_test;
+
  endinterface
 
 `endif 
