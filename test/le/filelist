@@ -1,0 +1,5 @@
+top.sv
+interface.sv
+freq_det.v
+checker.sv
+scoreboard.sv
