@@ -1,8 +1,20 @@
+`include "scoreboard.sv"
+`include "interface.sv"
+`include "stimulus.sv"
+`include "checker.sv"
+`include "monitor.sv"
+
 module top();
 
 	reg clk;
+	int test1; 
 
 	intf_sn76489 intf(clk);
+
+	scoreboard sb = new;
+	stimulus_sn76489 stim = new(intf, sb);
+	monitor mnt = new();
+	checker_ check = new(intf,sb,mnt);
 
 	sn76489_top DUV (
 		.clock_i(clk),
@@ -20,19 +32,94 @@ module top();
 	assign intf.tone3_out_o = DUV.tone3_s;
 	assign intf.noise_out_o = DUV.noise_s;
  
+	freq_det det1( .clk(clk),			
+				  .in_signal(DUV.tone1_s),		// signal to be detected	
+				  .out_counter(intf.det_counter_out[0]),    // output counter value
+				  .done(intf.det_done_out[0]),
+				  .out_magnitude(intf.det_magnitude_out[0])
+	);
+
+	freq_det det2( .clk(clk),			
+				  .in_signal(DUV.tone2_s),		// signal to be detected	
+				  .out_counter(intf.det_counter_out[1]),    // output counter value
+				  .done(intf.det_done_out[1]),
+				  .out_magnitude(intf.det_magnitude_out[1])
+	);
+
+	freq_det det3( .clk(clk),			
+				  .in_signal(DUV.tone3_s),		// signal to be detected	
+				  .out_counter(intf.det_counter_out[2]),    // output counter value
+				  .done(intf.det_done_out[2]),
+				  .out_magnitude(intf.det_magnitude_out[2])
+	);
+
+	freq_det det4( .clk(clk),			
+				  .in_signal(DUV.noise_s),		// signal to be detected	
+				  .out_counter(intf.det_counter_out[3]),    // output counter value
+				  .done(intf.det_done_out[3]),
+				  .out_magnitude(intf.det_magnitude_out[3])
+	);
 
 	initial  begin// clock generator
 	clk = 0;
-	forever #50 clk = ~clk;
+	forever #10 clk = ~clk;
 	end
 
-	always @ (posedge clk) 
+	always @ (intf.ready_o, intf.d_i, intf.we_n_i, intf.ce_n_i, intf.res_n_i, intf.tone1_out_o, intf.tone2_out_o, intf.tone3_out_o, intf.noise_out_o, DUV.clk_en_s) 
   begin
-		$monitor ("%d \t %d \t %d \t %d", intf.tone1_out_o, intf.tone2_out_o, intf.tone3_out_o, intf.noise_out_o);
-  end
+//		$monitor ("%d \t %d \t %d \t %d", intf.tone1_out_o, intf.tone2_out_o, intf.tone3_out_o, intf.noise_out_o);
+		$display ("%d\t%d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d",$time, intf.ready_o, intf.d_i, intf.we_n_i, intf.ce_n_i, intf.res_n_i, intf.tone1_out_o, intf.tone2_out_o, intf.tone3_out_o, intf.noise_out_o, DUV.clk_en_s);
+	end
+
+	always @ (posedge intf.det_done_out[0])
+	begin
+		$display("Tone Generator 1, Frequency %d\t Magnitude %d",intf.det_counter_out[0],intf.det_magnitude_out[0]);
+	end
+
+	always @ (posedge intf.det_done_out[1])
+	begin
+		$display("Tone Generator 2, Frequency %d\t Magnitude %d",intf.det_counter_out[1],intf.det_magnitude_out[1]);
+	end
+
+	always @ (posedge intf.det_done_out[2])
+	begin
+		$display("Tone Generator 3, Frequency %d\t Magnitude %d",intf.det_counter_out[2],intf.det_magnitude_out[2]);
+	end
+
+	always @ (posedge intf.det_done_out[3])
+	begin
+		$display("Noise Generator, Frequency %d\t Magnitude %d",intf.det_counter_out[3],intf.det_magnitude_out[3]);
+	end
+
+function display_registers(); 
+		$display("Tone1: freq\t%d\tatten\t%d",DUV.tone1_b.f_q, DUV.tone1_b.a_q);
+		$display("Tone2: freq\t%d\tatten\t%d",DUV.tone2_b.f_q, DUV.tone2_b.a_q);
+		$display("Tone3: freq\t%d\tatten\t%d",DUV.tone3_b.f_q, DUV.tone3_b.a_q);
+		$display("Noise: freq\t%d\tatten\t%d",{DUV.noise_b.fb_q,DUV.noise_b.nf_q}, DUV.noise_b.a_q);
+endfunction
 
 initial begin
-	#100000 $stop;
+display_registers();
+//	sb.abc();
+	stim.test_1;
+	stim.reset;
+
+	display_registers();
+	for (int i = 0; i < 8; i++) 
+	begin
+		stim.write_register(i,i+1);
+		display_registers();
+	end
+
+//	test1 = sb.check_frequency(1,1); 		$display("testa, %d", test1);
+//	test1 = sb.check_frequency(1,100); 		$display("testb, %d", test1);
+//  test1 = sb.check_frequency(1,5);		$display("testc, %d", test1);
+//	test1 = 100; $display("testc, %d", test1);
+//	sb.set_frequency(1,100);
+//	test1 = sb.check_frequency(1,100); 		$display("testb, %d", test1);
+//  test1 = sb.check_frequency(1,100); 		$display("testb, %d", test1);
+
+	#10000 $stop;
 end
 
 
