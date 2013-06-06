@@ -73,22 +73,22 @@ module top();
 
 	always @ (posedge intf.det_done_out[0])
 	begin
-		$display("Tone Generator 1, Frequency %d\t Magnitude %d",intf.det_counter_out[0],intf.det_magnitude_out[0]);
+		$display("Tone Generator 1, Frequency %d\t(%d)\t Magnitude %d",intf.det_counter_out[0],(intf.det_counter_out[0]+1)>>4,intf.det_magnitude_out[0]);
 	end
 
 	always @ (posedge intf.det_done_out[1])
 	begin
-		$display("Tone Generator 2, Frequency %d\t Magnitude %d",intf.det_counter_out[1],intf.det_magnitude_out[1]);
+		$display("Tone Generator 2, Frequency %d\t(%d)\t Magnitude %d",intf.det_counter_out[1],(intf.det_counter_out[1]+1)>>4,intf.det_magnitude_out[1]);
 	end
 
 	always @ (posedge intf.det_done_out[2])
 	begin
-		$display("Tone Generator 3, Frequency %d\t Magnitude %d",intf.det_counter_out[2],intf.det_magnitude_out[2]);
+		$display("Tone Generator 3, Frequency %d\t(%d)\t Magnitude %d",intf.det_counter_out[2],(intf.det_counter_out[2]+1)>>4,intf.det_magnitude_out[2]);
 	end
 
 	always @ (posedge intf.det_done_out[3])
 	begin
-		$display("Noise Generator, Frequency %d\t Magnitude %d",intf.det_counter_out[3],intf.det_magnitude_out[3]);
+		$display("Noise Generator, Frequency %d\t(%d)\t Magnitude %d",intf.det_counter_out[3],(intf.det_counter_out[3]+1)>>4,intf.det_magnitude_out[3]);
 	end
 
 function display_registers(); 
@@ -111,6 +111,7 @@ display_registers();
 		display_registers();
 	end
 
+check.check(1);
 //	test1 = sb.check_frequency(1,1); 		$display("testa, %d", test1);
 //	test1 = sb.check_frequency(1,100); 		$display("testb, %d", test1);
 //  test1 = sb.check_frequency(1,5);		$display("testc, %d", test1);
@@ -119,7 +120,7 @@ display_registers();
 //	test1 = sb.check_frequency(1,100); 		$display("testb, %d", test1);
 //  test1 = sb.check_frequency(1,100); 		$display("testb, %d", test1);
 
-	#10000 $stop;
+//	#10000 $stop;
 end
 
 

@@ -216,8 +216,18 @@ class stimulus_sn76489;
 			command_byte = {1'b0,1'b1,data_bits[5:0]};	
 		end
 
+		sb.modified[register_bits[2:1]] = 1;
 		drive_byte(command_byte);
-		if (second_byte) drive_byte(command_byte2);
+		if (register_bits[0]) begin 
+			sb.set_frequency(register_bits[2:1],data);
+		end
+		else begin
+			sb.set_attenuation(register_bits[2:1],data);
+		end
+		if (second_byte) begin
+			drive_byte(command_byte2);
+		end
+		sb.modified[register_bits[2:1]] = 1;
 
 	endtask			// write_register
 

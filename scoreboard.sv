@@ -13,12 +13,13 @@
 //		This tells the driver if it can make a new change.
 	
 	class scoreboard;
-		int 				frequency[4];			
-		int					attenuation[4];
+		logic 	[0:9]	frequency[4];			
+		logic		[0:3]	attenuation[4];
 		bit						modified[4];					// This is set when a new frequency is set on a generator, 
 																				// when the checker presents a period count to verification
 																				// if this is set, it will unset it and ignore the results.
 		bit						checked[4];						// This is set when the checker has checked the frequency of a generator
+		int 					packet_number;				// the number of the last command packet sent.
 
 
 		// new() sets all frequency and attenuation values to -1 (initial values unspecified on datasheet)
@@ -26,6 +27,7 @@
 		function new();
 			this.frequency[0] = 1;
 			this.frequency[1] = 5;
+			this.packet_number = 0;
 
 			foreach( this.frequency[j] )
 				this.frequency[j] = -1;
