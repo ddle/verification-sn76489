@@ -187,6 +187,9 @@ class stimulus_sn76489;
 		bit [7:0] command_byte,command_byte2;
 		bit second_byte = 0;
 
+		if (sb.checked[ register_bits[2:1] ] == 0)
+			@ (posedge sb.checked[ register_bits[2:1] ] ); 
+
 		$display("command byte - register: %d value: %d", register_bits, data_bits);
 
 		if (register == 0 || register == 2 || register == 4) begin
@@ -216,18 +219,24 @@ class stimulus_sn76489;
 			command_byte = {1'b0,1'b1,data_bits[5:0]};	
 		end
 
-		sb.modified[register_bits[2:1]] = 1;
+		sb.packet_number++;
+		sb.modified[register_bits[2:1]][register_bits[0]] = 1;
 		drive_byte(command_byte);
-		if (register_bits[0]) begin 
-			sb.set_frequency(register_bits[2:1],data);
+		if (register_bits[0] == 0) begin 
+			//sb.set_frequency(register_bits[2:1],data);
+			sb.frequency[register_bits[2:1]] = data;
 		end
 		else begin
-			sb.set_attenuation(register_bits[2:1],data);
+			//sb.set_attenuation(register_bits[2:1],data);
+			sb.attenuation[register_bits[2:1]] = data;
 		end
 		if (second_byte) begin
 			drive_byte(command_byte2);
 		end
-		sb.modified[register_bits[2:1]] = 1;
+		fork
+		@ (negedge intf.det_done_out[register_bits[2:1]])
+		sb.modified[register_bits[2:1]][register_bits[0]] = 0;		
+		join_none
 
 	endtask			// write_register
 

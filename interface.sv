@@ -16,7 +16,7 @@
   logic		[0:7]	noise_out_o;
   logic		[0:7]	aout_o;
 
-  logic		[0:7]	det_counter_out[4];
+  logic		[0:9]	det_counter_out[4];
   logic		[0:7]	det_magnitude_out[4];
   logic			det_done_out[4];
 

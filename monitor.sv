@@ -27,9 +27,5 @@ typedef packet_t packet_queue[$];
        endfunction
 
 
-	function push_back(packet_t packet);
-		//empty function;
-	endfunction
-
 	endclass
 `endif 
