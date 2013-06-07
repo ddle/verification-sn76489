@@ -7,7 +7,7 @@
         	scoreboard sb;
         	virtual intf_sn76489 intf;
 		monitor mnt;
-		int magnitude_values [16] = {31,25,20,16,12,10,8,6,5,4,3,2,2,1,1,0};
+		int magnitude_values [16] = {31,25,20,16,12,10,8,6,5,4,3,2,2,2,1,0};
         
         	function new(virtual intf_sn76489 intf,scoreboard sb, monitor mnt);
            	 	this.intf = intf;

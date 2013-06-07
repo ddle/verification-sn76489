@@ -27,6 +27,27 @@ class stimulus_sn76489;
 
 // test case 1.  Verify function of READY output according to table 5 of SN76489 datasheet.
 	task test_1();
+		// SN76489 Datasheet Table 5 is valid when:
+		//		(1) device is not being clocked. 
+		intf.clock_en_i = 0;
+		//		(2) device is initialized by pulling n_we_i and n_ce_i both high. 
+		intf.ce_n_i = 1;
+		intf.we_n_i = 1; 	
+		
+		// run test cases 1.1 through 1.4 in different orders. 
+		test_1_1();
+		test_1_3();
+		test_1_2();
+		test_1_4();
+
+		test_1_2();
+		test_1_1();
+		test_1_4();
+		test_1_3();
+
+	endtask
+		
+	task test_1_1();		
 		// 1.1 Set CE and WE to 11, verify READY output is 1
 		intf.ce_n_i = 1;
 		intf.we_n_i = 1; 		
@@ -37,27 +58,34 @@ class stimulus_sn76489;
 		else 
 			$display("test case 1.1 passed");
 
+	endtask
+
+	task test_1_2();	
 		// 1.2 Set CE and WE to 10, verify READY output is 1
 		intf.ce_n_i = 1;
 		intf.we_n_i = 0; 		
 
 		@ (posedge intf.clk);
-			$display("test case 1.2...");		
 		if (intf.ready_o == 0)
 			$display("error on test case 1.2");
 		else 
 			$display("test case 1.2 passed");
 
+	endtask
+
+	task test_1_3();	
 		// 1.3 Set CE and WE to 01, verify READY output is 0
 		intf.ce_n_i = 0;
 		intf.we_n_i = 1; 		
 		@ (posedge intf.clk);
-			$display("test case 1.3...");		
 		if (intf.ready_o == 1)
 			$display("error on test case 1.3");
 		else 
-			$display("test case 1.4 passed");
+			$display("test case 1.3 passed");
 
+	endtask
+
+	task test_1_4();	
 		// 1.4 Set CE and WE to 00, verify READY output is 0
 		intf.ce_n_i = 0;
 		intf.we_n_i = 0; 		
@@ -69,7 +97,35 @@ class stimulus_sn76489;
 			$display("test case 1.4 passed");
 
 	endtask
- 
+
+ 	// test case 2.  Verify function of ready_o when loading data on the data bus.
+	task test_2();
+		int start_time;
+		int end_time;
+		int write_time;
+
+		$display("Starting test case 2");
+		intf.ce_n_i = 1;
+		intf.we_n_i = 1;
+		reset();
+		intf.ce_n_i = 0;
+		intf.d_i = {1'b1,3'b001,4'b0001};  // place data on bus - Tone 1 Attenuation = 1;
+		@ (posedge intf.clk); 
+		intf.we_n_i = 0;
+		if (intf.ready_o == 1) @ (negedge intf.ready_o);
+			
+		start_time = $time;
+		@ (posedge intf.ready_o);
+		end_time = $time;
+		write_time = (end_time - start_time) / 20;
+		if (write_time < 28 || write_time > 36) $display("Test case 2 failed,  # of clock cycles: %d", write_time);
+		else $display("Test case 2 pass, # of clock cycles: %d", write_time);
+
+		intf.ce_n_i = 1;
+		intf.we_n_i = 1;		
+		
+	endtask
+
 // command_byte() is used to initiate sending of a command byte.
 // inputs:
 //	int register - which register we are accessing. 

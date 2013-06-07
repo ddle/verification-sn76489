@@ -101,7 +101,11 @@ endfunction
 initial begin
 display_registers();
 //	sb.abc();
+// Begin test case 1.  
 	stim.test_1;
+// Begin test case 2.
+	stim.test_2;
+
 	stim.reset;
 
 fork 
@@ -117,12 +121,32 @@ fork
 	check.check(3);
 join_none
 
-	display_registers();
-	for (int i = 0; i < 8; i=i+2) 
+// Begin test case 3.
+	$display("Begin Test Case 3");
+	for (int i = 3; i < 8; i=i+2) 
 	begin
-		stim.write_register(i,i+1);
-		display_registers();
+		stim.write_register(i,4'b1111);	// set attenuation to off
 	end
+	for (int j = 0; j < 3; j++)
+	begin
+		stim.write_register((j*2)+1,4'b0000);	// set attenuation to off
+		stim.write_register((j*2),10'b11_1111_1111);	// set frequency to maximum
+		$display("Test Case 3.1.%d set...", j);	
+		display_registers();
+		for (int i = 0; i < 4; i++) @ (posedge intf.det_done_out[j]);
+		stim.write_register((j*2),10'b1);	// set frequency to minimum
+		$display("Test Case 3.2.%d set...",j);	
+		display_registers();
+		for (int i = 0; i < 4; i++) @ (posedge intf.det_done_out[j]);
+		$display("Begin Test Case 3.3.%d set...",j);	
+		for (int i = 1; i < 16; i++)
+		begin
+		stim.write_register((j*2)+1,i);	// step through attenuation values
+		if (i < 15) for (int i = 0; i < 4; i++) @ (posedge intf.det_done_out[j]);
+		end
+	end
+	$display("End Test Case 3");
+
 	display_registers();
 	for (int i = 1; i < 6; i=i+2) 
 	begin
