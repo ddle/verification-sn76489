@@ -1,3 +1,4 @@
+
 `include "scoreboard.sv"
 `include "interface.sv"
 `include "stimulus.sv"
@@ -122,7 +123,7 @@ fork
 join_none
 
 // Begin test case 3.
-	$display("Begin Test Case 3");
+/*	$display("Begin Test Case 3");
 	for (int i = 3; i < 8; i=i+2) 
 	begin
 		stim.write_register(i,4'b1111);	// set attenuation to off
@@ -146,6 +147,17 @@ join_none
 		end
 	end
 	$display("End Test Case 3");
+*/
+	for (int i = 1; i < 8; i=i+2) 
+	begin
+		stim.write_register(i,4'b1);	// set attenuation to off
+	end
+	$display("Start Test Case 5, Random Stimulation");
+	repeat (200) begin
+		stim.drive_random;
+		display_registers;
+	end
+	$display("End Test Case 5");
 
 	display_registers();
 	for (int i = 1; i < 6; i=i+2) 

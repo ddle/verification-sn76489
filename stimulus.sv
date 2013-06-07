@@ -1,15 +1,14 @@
-	
-
 `ifndef GUARD_STIM 
 `define GUARD_STIM
 
 `include "interface.sv"
+`include "random.sv"
 
 // stimuls class for SN76489 Complex Sound Generator chip verification.
 
 class stimulus_sn76489;
 
-	
+	rand_test_case		rnd = new(5);
 	virtual intf_sn76489		intf;			// interface to DUV.
 	scoreboard			sb;				// scoreboard
 
@@ -237,7 +236,7 @@ class stimulus_sn76489;
 		#40	intf.res_n_i = 1;
 	endtask
 
-	task write_register(int register, int data);
+	task write_register(int register, int data, bit xval = 0);
 		bit [2:0] register_bits = register;
 		bit [9:0] data_bits = data;
 		bit [7:0] command_byte,command_byte2;
@@ -251,13 +250,13 @@ class stimulus_sn76489;
 		if (register == 0 || register == 2 || register == 4) begin
 			// Tone generator frequency registers
 			command_byte = {1'b1,register_bits,data_bits[3:0]};
-			command_byte2 = {1'b0,1'b1,data_bits[9:4]};
+			command_byte2 = {1'b0,xval,data_bits[9:4]};
 			second_byte = 1;
 			$display("tone generator register - %d %d", command_byte, command_byte2);
 		end
 		else if (register == 6) begin
 			// Noise source register
-			command_byte = {1'b1,register_bits,1'b0,data_bits[2:0]};
+			command_byte = {1'b1,register_bits,xval,data_bits[2:0]};
 			$display("noise source control register - %d", command_byte);
 		end
 		else if (register == 1 || register == 3 || register == 5 || register == 7) begin
@@ -278,10 +277,13 @@ class stimulus_sn76489;
 		sb.packet_number++;
 		sb.modified[register_bits[2:1]][register_bits[0]] = 1;
 		drive_byte(command_byte);
-		if (register_bits[0] == 0) begin 
+		if (register_bits[0] == 0 && register <= 7) begin 
 			//sb.set_frequency(register_bits[2:1],data);
 			sb.frequency[register_bits[2:1]] = data;
 		end
+		else if (register_bits[0] == 0 && register > 7) begin
+			sb.frequency[register_bits[2:1]] = {data[9:4],sb.frequency[register_bits[2:1]][6:9]};
+		end 
 		else begin
 			//sb.set_attenuation(register_bits[2:1],data);
 			sb.attenuation[register_bits[2:1]] = data;
@@ -296,6 +298,14 @@ class stimulus_sn76489;
 
 	endtask			// write_register
 
+	
+	task drive_random();
+		int register_temp;
+		rnd.randomize();
+		register_temp = (rnd.register > 7) ? rnd.latched_reg[2:1] : rnd.register[2:1];
+		if (sb.checked[register_temp] == 0) @ (posedge sb.checked[register_temp]);
+		write_register(rnd.register, rnd.data, rnd.xval);
+	endtask
 
 endclass
 `endif 
