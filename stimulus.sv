@@ -3,6 +3,7 @@
 
 `include "interface.sv"
 `include "random.sv"
+`include "coverage.sv"
 
 // stimuls class for SN76489 Complex Sound Generator chip verification.
 
@@ -11,10 +12,13 @@ class stimulus_sn76489;
 	rand_test_case		rnd = new(5);
 	virtual intf_sn76489		intf;			// interface to DUV.
 	scoreboard			sb;				// scoreboard
+	
+	sn_coverage cov;		
 
 	function new(virtual intf_sn76489 intf,scoreboard sb);
 		this.intf = intf;
 		this.sb = sb;
+		cov = new();
 	endfunction
 
 	task init(); 
@@ -288,10 +292,16 @@ class stimulus_sn76489;
 			//sb.set_attenuation(register_bits[2:1],data);
 			sb.attenuation[register_bits[2:1]] = data;
 		end
+//		if (sb.frequency[register_bits[2:1]] > 0 && sb.attenuation[register_bits[2:1]] < 15)
+//				sb.checked[register_bits[2:1]] = 0;
 		if (second_byte) begin
 			drive_byte(command_byte2);
+			
+		cov.sample(sb);
+
 		end
 		fork
+		@ (negedge intf.det_done_out[register_bits[2:1]])
 		@ (negedge intf.det_done_out[register_bits[2:1]])
 		sb.modified[register_bits[2:1]][register_bits[0]] = 0;		
 		join_none
@@ -303,7 +313,27 @@ class stimulus_sn76489;
 		int register_temp;
 		rnd.randomize();
 		register_temp = (rnd.register > 7) ? rnd.latched_reg[2:1] : rnd.register[2:1];
-		if (sb.checked[register_temp] == 0) @ (posedge sb.checked[register_temp]);
+//	if (sb.checked[register_temp] == 0) @ (posedge sb.checked[register_temp]);
+	
+		if (sb.modified[register_temp] && sb.frequency[register_temp] > 0 && sb.attenuation[register_temp] < 15) 
+		begin 
+			$display("%d Waiting for generator %d to be evaluated",$time,register_temp);
+			@ (posedge intf.det_done_out[register_temp]);
+		end
+
+		if (sb.modified[register_temp] && sb.frequency[register_temp] > 0 && sb.attenuation[register_temp] < 15) 
+		begin 
+			$display("%d Waiting for generator %d to be evaluated",$time,register_temp);
+			@ (posedge intf.det_done_out[register_temp]);
+		end
+
+		if (sb.modified[register_temp] && sb.frequency[register_temp] > 0 && sb.attenuation[register_temp] < 15) 
+		begin 
+			$display("%d Waiting for generator %d to be evaluated",$time,register_temp);
+			@ (posedge intf.det_done_out[register_temp]);
+		end
+		
+		$display("Drive Random: register = %d data = %d, xval = %d, register_temp = %d",rnd.register,rnd.data,rnd.xval,register_temp);
 		write_register(rnd.register, rnd.data, rnd.xval);
 	endtask
 

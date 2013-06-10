@@ -20,12 +20,11 @@
 			forever begin
 				// on "done" signal, check freq detector outputs with values on scoreboard
 		       	@ (posedge intf.clk); // operate on clk edge
-				if (intf.end_of_test && sb.checked[generator] == 1 && sb.modified[generator] == 0) break;
 				if (intf.det_done_out[generator]) begin
 					// check if modified bit is set
 					if (sb.modified[generator]) begin
 						//sb.modified[generator] = 0;
-						$display("Ignoring...");
+						$display("Ignoring... %d",generator);
 						continue; // ignore this current configuration
 					end
 					// check freq ???
@@ -43,11 +42,15 @@
 						mnt.error_count++;
 						mnt.error_packet_q.push_back(current_packet);
 						$display("ERROR: output mismatch\tgen: %d\tfreq %d\texp freq %d\tmag %d\texp mag %d\tpacket %d",generator,intf.det_counter_out[generator],sb.frequency[generator],intf.det_magnitude_out[generator],magnitude_values[sb.attenuation[generator]],sb.packet_number);
+						$stop;
 					end
-					else $display("Check succeded\tgenerator: %d\tfrequency %d\tmagnitude %d\tpacket %d",generator,intf.det_counter_out[generator],intf.det_magnitude_out[generator],sb.packet_number);
+					else 
+					begin
+						$display("Check succeded\tgenerator: %d\tfrequency %d\tmagnitude %d\tpacket %d",generator,intf.det_counter_out[generator],intf.det_magnitude_out[generator],sb.packet_number);
+						if (intf.end_of_test) break;
 					// notify check status
-					sb.checked[generator] = 1;
-				
+						sb.checked[generator] = 1;
+					end
 				end
 				else begin
 					//sb.checked[generator] = 0;

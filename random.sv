@@ -9,9 +9,22 @@
 		{
 			// register is the register to change (0-7),(8 uses latched register)
 			register >=0; 
-			register <=8;
+			register <=5;
+			if(register == 6 || (register == 8 && latched_reg == 6))
+			{
 			data >=0;
-			data <= (2^10)-1;
+			data <= 7;
+			}
+			else if(register[0] == 0 || (register == 8 && latched_reg[0] == 0))
+			{
+			data >=1;
+			data <= 1023;
+			}
+			else
+			{
+			data >=0;
+			data <= 15;
+			}
 		}
 
 		function new (int seed); 
@@ -25,8 +38,9 @@
 		endfunction 
 	
 		function void post_randomize;
-			if(register == 8 && latched_reg < 0) register = 1;
-			if((register == 0 || register == 2 || register == 4) && data == 0) data = 1;
+//			$display("Random Values: %d %d",register,data);
+//			if(register == 8 && latched_reg < 0) register = 1;
+//			if((register == 0 || register == 2 || register == 4) && data == 0) data = 1;
 		endfunction
 
 	endclass

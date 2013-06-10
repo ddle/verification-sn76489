@@ -72,6 +72,26 @@ module top();
 //		$display ("%d\t%d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %d",$time, intf.ready_o, intf.d_i, intf.we_n_i, intf.ce_n_i, intf.res_n_i, intf.tone1_out_o, intf.tone2_out_o, intf.tone3_out_o, intf.noise_out_o, DUV.clk_en_s);
 	end
 
+	always @ (intf.det_done_out[0], sb.checked[0], sb.modified[0])
+	begin
+//		$display("%d\tgen %d\tdet_done %d\tchecked %d\tmodified %d",$time,0,intf.det_done_out[0], sb.checked[0], sb.modified[0]);
+	end
+
+	always @ (intf.det_done_out[1], sb.checked[1], sb.modified[1])
+	begin
+//		$display("%d\tgen %d\tdet_done %d\tchecked %d\tmodified %d",$time,1,intf.det_done_out[1], sb.checked[1], sb.modified[1]);
+	end
+
+	always @ (intf.det_done_out[2], sb.checked[2], sb.modified[2])
+	begin
+//		$display("%d\tgen %d\tdet_done %d\tchecked %d\tmodified %d",$time,2,intf.det_done_out[2], sb.checked[2], sb.modified[2]);
+	end
+
+	always @ (intf.det_done_out[3], sb.checked[3], sb.modified[3])
+	begin
+//		$display("%d\tgen %d\tdet_done %d\tchecked %d\tmodified %d",$time,3,intf.det_done_out[3], sb.checked[3], sb.modified[3]);
+	end
+
 	always @ (posedge intf.det_done_out[0])
 	begin
 //		$display("Tone Generator 1, Frequency %d\t Magnitude %d",intf.det_counter_out[0],intf.det_magnitude_out[0]);
@@ -123,7 +143,7 @@ fork
 join_none
 
 // Begin test case 3.
-/*	$display("Begin Test Case 3");
+	$display("Begin Test Case 3");
 	for (int i = 3; i < 8; i=i+2) 
 	begin
 		stim.write_register(i,4'b1111);	// set attenuation to off
@@ -147,39 +167,19 @@ join_none
 		end
 	end
 	$display("End Test Case 3");
-*/
+
 	for (int i = 1; i < 8; i=i+2) 
 	begin
-		stim.write_register(i,4'b1);	// set attenuation to off
+		stim.write_register(i,4'b1);	// set attenuation to on.
 	end
+
 	$display("Start Test Case 5, Random Stimulation");
-	repeat (200) begin
+	repeat (500) begin
 		stim.drive_random;
 		display_registers;
 	end
 	$display("End Test Case 5");
 
-	display_registers();
-	for (int i = 1; i < 6; i=i+2) 
-	begin
-		stim.write_register(i,i+1);
-		display_registers();
-	end
-		stim.write_register(6,0);
-		display_registers();
-
-		#500 stim.write_register(1,0);
-		display_registers();
-
-		#500 stim.write_register(0,0);
-		display_registers();
-//		stim.write_register(0,1);
-//	display_registers();
-//	for (int i = 0; i < 16; i++) 
-//	begin
-//		stim.write_register(1,i);
-//		display_registers();
-//	end
 	intf.end_of_test = 1;
 
 
@@ -192,8 +192,8 @@ join_none
 //	sb.set_frequency(1,100);
 //	test1 = sb.check_frequency(1,100); 		$display("testb, %d", test1);
 //  test1 = sb.check_frequency(1,100); 		$display("testb, %d", test1);
-
-//	#10000 $stop;
+	$display($time);
+	#15600000 $stop;
 end
 
 
