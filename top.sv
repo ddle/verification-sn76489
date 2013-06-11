@@ -174,7 +174,7 @@ join_none
 	end
 
 	$display("Start Test Case 5, Random Stimulation");
-	repeat (500) begin
+	repeat (100000) begin
 		stim.drive_random;
 		display_registers;
 	end

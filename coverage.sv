@@ -9,10 +9,10 @@ class sn_coverage;
 
 	covergroup chip_coverage;
 		// collect freq coverage
-		generator_0_frequency : coverpoint sb.frequency[0]; 
-		generator_1_frequency : coverpoint sb.frequency[1]; 
-		generator_2_frequency : coverpoint sb.frequency[2]; 
-		generator_3_frequency : coverpoint sb.frequency[3]; 
+		generator_0_frequency : coverpoint sb.frequency[0] { option.auto_bin_max = 1024; } 
+		generator_1_frequency : coverpoint sb.frequency[1] { option.auto_bin_max = 1024; }
+		generator_2_frequency : coverpoint sb.frequency[2] { option.auto_bin_max = 1024; } 
+		generator_3_frequency : coverpoint sb.frequency[3] { option.auto_bin_max = 1024; } 
 
 		// collect attenuation coverage
 		generator_0_attenuation : coverpoint sb.attenuation[0]; 
